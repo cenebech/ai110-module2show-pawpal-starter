@@ -227,6 +227,21 @@ def test_scheduler_detects_same_time_conflicts_for_same_pet():
     assert scheduler.add_task_to_pet(dog, same_time_task) is False
 
 
+def test_scheduler_flags_duplicate_times_with_warning():
+    owner = Owner(name="Nuela")
+    dog = Pet("Dog", "Buddy", "Golden Retriever", 4)
+    existing_task = Task("Morning walk", date(2026, 7, 8), "08:00", "Daily")
+    duplicate_time_task = Task("Breakfast", date(2026, 7, 8), "08:00", "Daily")
+    dog.add_task(existing_task)
+    owner.add_pet(dog)
+    scheduler = Scheduler(owner=owner)
+
+    warning = scheduler.get_conflict_warning(duplicate_time_task, selected_pet=dog)
+
+    assert warning is not None
+    assert "already has 'Morning walk'" in warning
+
+
 def test_scheduler_detects_same_time_conflicts_for_different_pets():
     owner = Owner(name="Nuela")
     dog = Pet("Dog", "Buddy", "Golden Retriever", 4)
@@ -242,6 +257,20 @@ def test_scheduler_detects_same_time_conflicts_for_different_pets():
 
     assert conflicts == [{"pet": dog, "task": dog_task}]
     assert scheduler.add_task_to_pet(cat, cat_task) is False
+
+
+def test_scheduler_treats_24_hour_and_am_pm_times_as_same_time():
+    owner = Owner(name="Nuela")
+    dog = Pet("Dog", "Buddy", "Golden Retriever", 4)
+    existing_task = Task("Morning walk", date(2026, 7, 8), "08:00", "Daily")
+    same_time_task = Task("Breakfast", date(2026, 7, 8), "8:00 AM", "Daily")
+    dog.add_task(existing_task)
+    owner.add_pet(dog)
+    scheduler = Scheduler(owner=owner)
+
+    conflicts = scheduler.find_same_time_conflicts(same_time_task, selected_pet=dog)
+
+    assert conflicts == [{"pet": dog, "task": existing_task}]
 
 
 def test_scheduler_returns_warning_message_for_conflict():
@@ -270,6 +299,62 @@ def test_scheduler_returns_no_warning_when_task_does_not_conflict():
     scheduler = Scheduler(owner=owner)
 
     assert scheduler.get_conflict_warning(new_task, selected_pet=dog) is None
+
+
+def test_scheduler_returns_warning_for_invalid_time_format():
+    owner = Owner(name="Nuela")
+    dog = Pet("Dog", "Buddy", "Golden Retriever", 4)
+    existing_task = Task("Morning walk", date(2026, 7, 8), "08:00", "Daily")
+    invalid_task = Task("Breakfast", date(2026, 7, 8), "breakfast time", "Daily")
+    dog.add_task(existing_task)
+    owner.add_pet(dog)
+    scheduler = Scheduler(owner=owner)
+
+    warning = scheduler.get_conflict_warning(invalid_task, selected_pet=dog)
+
+    assert warning == (
+        "Warning: this task has an invalid time format, so PawPal could not check conflicts."
+    )
+
+
+def test_scheduler_groups_schedule_entries_by_day():
+    owner = Owner(name="Nuela")
+    dog = Pet("Dog", "Buddy", "Golden Retriever", 4)
+    today_task = Task("Morning walk", date(2026, 7, 8), "08:00", "Daily")
+    tomorrow_task = Task("Dinner", date(2026, 7, 9), "18:00", "Daily")
+    dog.add_task(tomorrow_task)
+    dog.add_task(today_task)
+    owner.add_pet(dog)
+    scheduler = Scheduler(owner=owner)
+
+    tasks_by_day = scheduler.organize_tasks_by_day()
+
+    assert list(tasks_by_day.keys()) == [date(2026, 7, 8), date(2026, 7, 9)]
+    assert tasks_by_day[date(2026, 7, 8)][0]["task"] == today_task
+    assert tasks_by_day[date(2026, 7, 9)][0]["task"] == tomorrow_task
+
+
+def test_scheduler_skips_conflicting_recurring_task_copies():
+    owner = Owner(name="Nuela")
+    dog = Pet("Dog", "Buddy", "Golden Retriever", 4)
+    existing_task = Task("Medication", date(2026, 7, 9), "08:00", "Daily")
+    recurring_task = Task("Morning walk", date(2026, 7, 8), "08:00", "Daily")
+    dog.add_task(existing_task)
+    owner.add_pet(dog)
+    scheduler = Scheduler(owner=owner)
+
+    added_tasks, skipped_conflicts = scheduler.add_recurring_tasks_to_pet(
+        dog,
+        recurring_task,
+        count=3,
+    )
+
+    assert [task.scheduled_date for task in added_tasks] == [
+        date(2026, 7, 8),
+        date(2026, 7, 10),
+    ]
+    assert skipped_conflicts[0][0].scheduled_date == date(2026, 7, 9)
+    assert skipped_conflicts[0][1] == existing_task
 
 
 def test_scheduler_creates_recurring_tasks_and_suggestions():

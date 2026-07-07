@@ -54,21 +54,38 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 #   ...
 ```
 
-## 🧪 Testing PawPal+
+## Testing PawPal+
+
+Run the full test suite with:
 
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest
 ```
 
-Sample test output:
+The tests cover the core PawPal+ logic, including task formatting, task
+completion, owner and pet task tracking, chronological sorting, filtering by pet
+or completion status, conflict detection, recurring task creation, automatic
+daily/weekly rescheduling, and warning messages for duplicate times.
 
+Successful test run:
+
+```text
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\nuela\OneDrive - purdue.edu\CodingPath\AI_Classes\AI_101\ai110-module2show-pawpal-starter
+plugins: anyio-4.14.1
+collected 24 items
+
+tests\test_pawpal.py ........................                            [100%]
+
+============================= 24 passed in 0.05s ==============================
 ```
-# Paste your pytest output here
-```
+
+Confidence Level: 5/5 stars
+
+Because all 24 tests pass and the tests cover sorting, filtering, recurrence,
+conflict detection, and warning behavior, I am highly confident in the current
+logic layer.
 
 ## 📐 Smarter Scheduling
 
