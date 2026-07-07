@@ -1,0 +1,46 @@
+classDiagram
+    class Owner {
+        +String name
+        +String address
+        +int amountOfPets
+        +addPet(pet)
+        +updateOwnerInfo(name, address)
+        +getPetCount()
+    }
+
+    class Pet {
+        +String typeOfPet
+        +String nameOfPet
+        +String breedOfPet
+        +int ageOfPet
+        +updatePetInfo(type, name, breed, age)
+        +getPetDetails()
+    }
+
+    class Task {
+        +bool showerPet
+        +bool cutPetNails
+        +bool cutPetHair
+        +bool giveVitaminBooster
+        +selectTask(taskName)
+        +removeTask(taskName)
+        +getSelectedTasks()
+    }
+
+    class Scheduler {
+        +String openDays
+        +String openHours
+        +String selectedDay
+        +String selectedTime
+        +showAvailableDays()
+        +showAvailableTimes()
+        +fillOutPetInformation(owner, pet)
+        +submitSchedule()
+        +showConfirmationMessage()
+    }
+
+    Owner "1" --> "1..*" Pet : owns
+    Pet "1" --> "0..*" Task : has care tasks
+    Scheduler "1" --> "1" Owner : schedules for
+    Scheduler "1" --> "1" Pet : schedules pet
+    Scheduler "1" --> "0..*" Task : includes
