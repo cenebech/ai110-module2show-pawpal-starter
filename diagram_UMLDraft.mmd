@@ -1,11 +1,16 @@
 classDiagram
-    class Owner {
-        +String name
-        +String address
-        +int amountOfPets
-        +addPet(pet)
-        +updateOwnerInfo(name, address)
-        +getPetCount()
+    class Task {
+        +String description
+        +Date scheduledDate
+        +String time
+        +String frequency
+        +bool isComplete
+        +markComplete()
+        +markIncomplete()
+        +updateTask(description, scheduledDate, time, frequency)
+        +getFormattedDate()
+        +getFormattedTime()
+        +getTaskDetails()
     }
 
     class Pet {
@@ -13,34 +18,53 @@ classDiagram
         +String nameOfPet
         +String breedOfPet
         +int ageOfPet
+        +List~Task~ tasks
         +updatePetInfo(type, name, breed, age)
+        +addTask(task)
+        +removeTask(task)
+        +getTasks()
+        +getPendingTasks()
+        +getCompletedTasks()
         +getPetDetails()
     }
 
-    class Task {
-        +bool showerPet
-        +bool cutPetNails
-        +bool cutPetHair
-        +bool giveVitaminBooster
-        +selectTask(taskName)
-        +removeTask(taskName)
-        +getSelectedTasks()
+    class Owner {
+        +String name
+        +String address
+        +List~Pet~ pets
+        +int amountOfPets
+        +addPet(pet)
+        +removePet(pet)
+        +updateOwnerInfo(name, address)
+        +getPetCount()
+        +getAllTasks()
+        +getTasksByPet()
     }
 
     class Scheduler {
+        +Owner owner
         +String openDays
+        +String openTime
+        +String closeTime
         +String openHours
         +String selectedDay
         +String selectedTime
+        +Pet selectedPet
         +showAvailableDays()
         +showAvailableTimes()
         +fillOutPetInformation(owner, pet)
+        +addTaskToPet(pet, task)
+        +retrieveAllTasks()
+        +organizeTasksByPet()
+        +getPendingTasks()
+        +getCompletedTasks()
+        +completeTask(task)
+        +schedulePetCare(day, time, pet)
         +submitSchedule()
         +showConfirmationMessage()
     }
 
-    Owner "1" --> "1..*" Pet : owns
+    Owner "1" --> "0..*" Pet : owns
     Pet "1" --> "0..*" Task : has care tasks
-    Scheduler "1" --> "1" Owner : schedules for
-    Scheduler "1" --> "1" Pet : schedules pet
-    Scheduler "1" --> "0..*" Task : includes
+    Scheduler "1" --> "0..1" Owner : manages
+    Scheduler "1" --> "0..1" Pet : schedules selected pet
