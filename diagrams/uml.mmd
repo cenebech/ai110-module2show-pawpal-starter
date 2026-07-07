@@ -1,15 +1,91 @@
 classDiagram
-    %% Replace the placeholders below with your actual classes, attributes, methods, and relationships.
-    %% Keep this file updated so it matches your final implementation.
-
-    class ClassName {
-        +type attribute
-        +method() returnType
+    class Task {
+        +String description
+        +Date scheduledDate
+        +String time
+        +String frequency
+        +bool isComplete
+        +int durationMinutes
+        +String priority
+        +markComplete()
+        +markIncomplete()
+        +updateTask(description, scheduledDate, time, frequency, durationMinutes, priority)
+        +getFormattedDate()
+        +getFormattedTime()
+        +getScheduledDatetime()
+        +getEndDatetime()
+        +getTaskDetails()
     }
 
-    class AnotherClass {
-        +type attribute
-        +method() returnType
+    class Pet {
+        +String typeOfPet
+        +String nameOfPet
+        +String breedOfPet
+        +int ageOfPet
+        +List~Task~ tasks
+        +updatePetInfo(type, name, breed, age)
+        +addTask(task)
+        +removeTask(task)
+        +getTasks()
+        +getPendingTasks()
+        +getCompletedTasks()
+        +getPetDetails()
     }
 
-    ClassName --> AnotherClass : relationship
+    class Owner {
+        +String name
+        +String address
+        +List~Pet~ pets
+        +int amountOfPets
+        +addPet(pet)
+        +removePet(pet)
+        +updateOwnerInfo(name, address)
+        +getPetCount()
+        +getAllTasks()
+        +getTasksByPet()
+        +findPetByName(petName)
+    }
+
+    class Scheduler {
+        +Owner owner
+        +String openDays
+        +String openTime
+        +String closeTime
+        +String openHours
+        +String selectedDay
+        +String selectedTime
+        +Pet selectedPet
+        +showAvailableDays()
+        +showAvailableTimes()
+        +fillOutPetInformation(owner, pet)
+        +addTaskToPet(pet, task)
+        +retrieveAllTasks()
+        +organizeTasksByPet()
+        +sortByTime(tasks)
+        +filterTasks(completionStatus, petName)
+        +buildScheduleEntries(includeCompleted, petName)
+        +organizeTasksByDay(includeCompleted, petName)
+        +getPendingTasks()
+        +getCompletedTasks()
+        +getNextTaskDue(petName)
+        +getTaskSuggestions(pet)
+        +isWithinOpenHours(task)
+        +findConflict(pet, newTask)
+        +findSameTimeConflicts(newTask, selectedPet)
+        +getConflictWarning(newTask, selectedPet)
+        +createRecurringTasks(task, count)
+        +addRecurringTasksToPet(pet, task, count)
+        +completeTask(task)
+        +createNextOccurrence(task)
+        +findPetForTask(task)
+        +schedulePetCare(day, time, pet)
+        +submitSchedule()
+        +showConfirmationMessage()
+    }
+
+    Owner "1" --> "0..*" Pet : owns
+    Pet "1" --> "0..*" Task : has care tasks
+    Scheduler "1" --> "0..1" Owner : manages schedule for
+    Scheduler "1" --> "0..1" Pet : tracks selected pet
+    Scheduler ..> Task : sorts filters detects conflicts
+    Scheduler ..> Pet : adds and retrieves pet tasks

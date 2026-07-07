@@ -22,6 +22,19 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Features
+
+- Sorting by time: `Scheduler.sort_by_time()` returns tasks in chronological order using each task's `time` value.
+- Filtered task views: `Scheduler.filter_tasks()` can show all tasks, pending tasks, completed tasks, or tasks for one pet.
+- Schedule grouping: `Scheduler.organize_tasks_by_day()` groups sorted tasks by date for an easier daily schedule view.
+- Conflict warnings: `Scheduler.get_conflict_warning()` returns friendly warning messages when tasks overlap or share the same exact time.
+- Duplicate-time detection: `Scheduler.find_same_time_conflicts()` checks whether one pet or multiple pets have tasks scheduled at the same date and time.
+- Overlap detection: `Scheduler.find_conflict()` detects time-window overlaps for the same pet.
+- Recurring tasks: `Scheduler.create_recurring_tasks()` and `Scheduler.add_recurring_tasks_to_pet()` generate repeated daily, weekly, every-two-weeks, or monthly tasks.
+- Daily and weekly completion recurrence: `Scheduler.complete_task()` creates the next pending daily or weekly task after the current one is marked complete.
+- Pet-specific suggestions: `Scheduler.get_task_suggestions()` suggests care tasks based on whether the pet is a dog, cat, or other animal.
+- Professional Streamlit displays: `app.py` uses `st.table`, `st.success`, `st.warning`, and `st.info` to present sorted schedules, filters, and conflict feedback clearly.
+
 ## Getting started
 
 ### Setup
@@ -42,17 +55,17 @@ pip install -r requirements.txt
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
 
-## 🖥️ Sample Output
+## Final UML Diagram
 
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
+The final Mermaid source is saved at `diagrams/uml_final.mmd`.
 
-```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
-```
+![PawPal+ final UML diagram](diagrams/uml_final.png)
+
+## Sample Output
+
+See the **Demo Walkthrough** section below for the full terminal output from
+`python main.py`, including sorted tasks, filtered task views, and a conflict
+warning example.
 
 ## Testing PawPal+
 
@@ -99,14 +112,69 @@ to make the app more useful for a pet owner.
 | Conflict detection logic | `Scheduler.find_conflict()`, `Scheduler.find_same_time_conflicts()`, `Scheduler.get_conflict_warning()`, `Scheduler.add_task_to_pet()` | Detects overlapping tasks for the same pet and exact same-time conflicts across one or more pets. The warning method returns a friendly message instead of crashing the app. |
 | Recurring task logic | `Scheduler.create_recurring_tasks()`, `Scheduler.add_recurring_tasks_to_pet()`, `Scheduler.complete_task()`, `Scheduler.create_next_occurrence()` | Creates repeated task copies for daily, weekly, every-two-weeks, and monthly schedules. When a daily or weekly task is completed, the scheduler can automatically create the next pending occurrence. |
 
-## 📸 Demo Walkthrough
+## Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+PawPal+ lets a pet owner manage care tasks through a Streamlit interface. A user can:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. Enter owner information such as name and address.
+2. Add one or more pets with type, breed, and age.
+3. Choose a pet and schedule a care task using suggested task names or a custom description.
+4. Set the task date, time, duration, priority, frequency, and number of recurring occurrences.
+5. See conflict warnings before a duplicate or overlapping task is scheduled.
+6. Mark pending tasks complete from the task management section.
+7. Generate a schedule that is sorted, grouped by day, and filterable by pet or completion status.
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+Example workflow:
+
+1. Add an owner named `Nuela`.
+2. Add `Buddy` as a dog and `Milo` as a cat.
+3. Schedule tasks such as `Morning walk`, `Breakfast`, `Grooming`, and `Clean litter box`.
+4. Generate the schedule to view tasks sorted chronologically.
+5. Try adding another task at `08:00` for Buddy to see the scheduler return a conflict warning.
+
+Key Scheduler behaviors shown:
+
+- `Scheduler.sort_by_time()` displays tasks from earliest to latest.
+- `Scheduler.filter_tasks()` separates pending, completed, and pet-specific task lists.
+- `Scheduler.get_conflict_warning()` returns a safe warning message instead of crashing.
+- `Scheduler.find_same_time_conflicts()` detects duplicate task times.
+- `Scheduler.complete_task()` supports daily and weekly recurrence when tasks are completed.
+
+Sample CLI output from `python main.py`:
+
+```text
+PawPal Terminal Demo for Nuela
+
+All Tasks Sorted By Time
+========================
+07:30 - Breakfast (pending)
+08:00 - Morning walk (pending)
+11:30 - Clean litter box (complete)
+14:00 - Grooming (complete)
+18:00 - Dinner (pending)
+
+Pending Tasks Only
+==================
+07:30 - Breakfast (pending)
+08:00 - Morning walk (pending)
+18:00 - Dinner (pending)
+
+Completed Tasks Only
+====================
+11:30 - Clean litter box (complete)
+14:00 - Grooming (complete)
+
+Buddy's Tasks
+=============
+08:00 - Morning walk (pending)
+14:00 - Grooming (complete)
+18:00 - Dinner (pending)
+
+Milo's Pending Tasks
+====================
+07:30 - Breakfast (pending)
+
+Conflict Warning Demo
+=====================
+Warning: Buddy already has 'Morning walk' scheduled near 08:00.
+```

@@ -47,6 +47,26 @@ if "scheduler" not in st.session_state:
 owner = st.session_state.owner
 scheduler = st.session_state.scheduler
 
+
+def build_task_table_rows(tasks):
+    rows = []
+    for task in tasks:
+        task_pet = scheduler.find_pet_for_task(task)
+        rows.append(
+            {
+                "Time": task.get_formatted_time(),
+                "Pet": task_pet.name_of_pet if task_pet else "Unknown pet",
+                "Task": task.description,
+                "Date": task.get_formatted_date(),
+                "Duration": f"{task.duration_minutes} min",
+                "Priority": task.priority,
+                "Status": "Complete" if task.is_complete else "Pending",
+                "Frequency": task.frequency,
+            }
+        )
+    return rows
+
+
 st.subheader("Owner Information")
 owner_name = st.text_input("Owner name", value=owner.name)
 owner_address = st.text_input("Owner address", value=owner.address)
@@ -85,6 +105,11 @@ if owner.pets:
             for pet in owner.pets
         ]
     )
+
+    sorted_tasks = scheduler.sort_by_time(owner.get_all_tasks())
+    if sorted_tasks:
+        st.success("Tasks are sorted chronologically by time.")
+        st.table(build_task_table_rows(sorted_tasks))
 else:
     st.info("No pets yet. Add one above.")
 
@@ -189,11 +214,13 @@ st.divider()
 st.subheader("Build Schedule")
 st.caption("Generate a sorted plan, group it by day, and filter by pet or completion status.")
 
-filter_col1, filter_col2 = st.columns(2)
+filter_col1, filter_col2, filter_col3 = st.columns(3)
 with filter_col1:
     schedule_pet_filter = st.selectbox("Schedule filter", ["All"] + pet_names if owner.pets else ["All"])
 with filter_col2:
     include_completed = st.checkbox("Include completed tasks", value=False)
+with filter_col3:
+    completion_filter = st.selectbox("Completion filter", ["All", "pending", "completed"])
 
 if st.button("Generate schedule"):
     next_entry = scheduler.get_next_task_due(schedule_pet_filter)
@@ -204,6 +231,16 @@ if st.button("Generate schedule"):
             f"Next up: {next_task.description} for {next_pet.name_of_pet} "
             f"on {next_task.get_formatted_date()} at {next_task.get_formatted_time()}."
         )
+
+    filtered_tasks = scheduler.filter_tasks(
+        completion_status=completion_filter,
+        pet_name=schedule_pet_filter,
+    )
+    if filtered_tasks:
+        st.success(f"Found {len(filtered_tasks)} task(s) matching your filters.")
+        st.table(build_task_table_rows(filtered_tasks))
+    else:
+        st.warning("No tasks match those filters.")
 
     tasks_by_day = scheduler.organize_tasks_by_day(
         include_completed=include_completed,
@@ -216,12 +253,4 @@ if st.button("Generate schedule"):
         for task_day, entries in tasks_by_day.items():
             day_label = task_day.strftime("%A, %B %d, %Y") if isinstance(task_day, date) else task_day
             st.markdown(f"**{day_label}**")
-            for entry in entries:
-                pet = entry["pet"]
-                task = entry["task"]
-                status = "complete" if task.is_complete else "pending"
-                st.write(
-                    f"{task.get_formatted_time()} - {pet.name_of_pet}: {task.description} "
-                    f"({task.duration_minutes} min, {task.priority} priority, {status})"
-                )
-                st.caption(f"Frequency: {task.frequency}")
+            st.table(build_task_table_rows([entry["task"] for entry in entries]))
