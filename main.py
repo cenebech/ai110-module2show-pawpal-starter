@@ -1,62 +1,68 @@
-"""Temporary terminal testing ground for PawPal logic."""
+"""Terminal demo for PawPal sorting and filtering logic."""
 
-from datetime import date, datetime
+from datetime import date
 
-from pawpal_system import Owner, Pet, Task
+from pawpal_system import Owner, Pet, Scheduler, Task
 
 
-def sort_task_entry(task_entry):
-    task = task_entry["task"]
-    task_time = datetime.strptime(task.time, "%I:%M %p").time()
-    return datetime.combine(task.scheduled_date, task_time)
+def print_tasks(title, tasks):
+    """Print a list of tasks in a readable terminal format."""
+    print(title)
+    print("=" * len(title))
+
+    if not tasks:
+        print("No tasks found.")
+        print()
+        return
+
+    for task in tasks:
+        status = "complete" if task.is_complete else "pending"
+        print(f"{task.time} - {task.description} ({status})")
+    print()
 
 
 def main():
     owner = Owner(name="Nuela", address="123 PawPal Lane")
-
-    dog = Pet(
-        type_of_pet="Dog",
-        name_of_pet="Buddy",
-        breed_of_pet="Golden Retriever",
-        age_of_pet=4,
-    )
-    cat = Pet(
-        type_of_pet="Cat",
-        name_of_pet="Milo",
-        breed_of_pet="Tabby",
-        age_of_pet=2,
-    )
-
+    dog = Pet("Dog", "Buddy", "Golden Retriever", 4)
+    cat = Pet("Cat", "Milo", "Tabby", 2)
     schedule_date = date(2026, 7, 7)
 
-    dog.add_task(Task("Shower pet", schedule_date, "10:30 AM", "Monthly"))
-    dog.add_task(Task("Cut pet nails", schedule_date, "11:00 AM", "Every 2 weeks"))
-    cat.add_task(Task("Give vitamin booster", schedule_date, "2:00 PM", "Weekly"))
+    # Add tasks out of order on purpose so sorting is easy to see.
+    dog.add_task(Task("Dinner", schedule_date, "18:00", "Daily"))
+    dog.add_task(Task("Morning walk", schedule_date, "08:00", "Daily"))
+    dog.add_task(Task("Grooming", schedule_date, "14:00", "Weekly"))
+    cat.add_task(Task("Clean litter box", schedule_date, "11:30", "Daily"))
+    cat.add_task(Task("Breakfast", schedule_date, "07:30", "Daily"))
+
+    dog.tasks[2].mark_complete()
+    cat.tasks[0].mark_complete()
 
     owner.add_pet(dog)
     owner.add_pet(cat)
 
-    schedule_entries = []
-    for pet in owner.pets:
-        for task in pet.tasks:
-            schedule_entries.append({"pet": pet, "task": task})
+    scheduler = Scheduler(owner=owner)
 
-    schedule_entries.sort(key=sort_task_entry)
-
-    print("Today's Schedule")
-    print("================")
-    print(f"Owner: {owner.name}")
+    print(f"PawPal Terminal Demo for {owner.name}")
     print()
 
-    for entry in schedule_entries:
-        pet = entry["pet"]
-        task = entry["task"]
-        print(
-            f"{task.get_formatted_date()}, {task.get_formatted_time()} - "
-            f"{pet.name_of_pet} the {pet.type_of_pet}: {task.description}"
-        )
-        print(f"Frequency: {task.frequency}")
-        print()
+    print_tasks("All Tasks Sorted By Time", scheduler.sort_by_time(owner.get_all_tasks()))
+    print_tasks("Pending Tasks Only", scheduler.filter_tasks(completion_status="pending"))
+    print_tasks("Completed Tasks Only", scheduler.filter_tasks(completion_status="completed"))
+    print_tasks("Buddy's Tasks", scheduler.filter_tasks(pet_name="Buddy"))
+    print_tasks(
+        "Milo's Pending Tasks",
+        scheduler.filter_tasks(completion_status="pending", pet_name="Milo"),
+    )
+
+    same_time_task = Task("Breakfast", schedule_date, "08:00", "Daily")
+    warning = scheduler.get_conflict_warning(same_time_task, selected_pet=dog)
+
+    print("Conflict Warning Demo")
+    print("=====================")
+    if warning:
+        print(warning)
+    else:
+        print("No conflict found.")
 
 
 if __name__ == "__main__":

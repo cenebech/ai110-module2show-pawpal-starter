@@ -2,15 +2,50 @@
 
 ## 1. System Design
 
+- Let a user enter basic owner + pet info
+- Let a user add/edit tasks (duration + priority at minimum)
+- Generate a daily schedule/plan based on constraints and priorities
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+classes:
+Owner:
+	Name
+	Address
+	Amount of pets
+Pets:
+	Type of Pet
+	Name of Pet
+	Breed of Pet
+	Age of Pet
+Task:
+	Shower Pet
+	Cut Pet Nails
+	Cut Pet Hair
+	Give pets a vitamin booster
+
+Scheduler
+	Show list of days that the pet office is open (Monday - Friday- 10:00 a.m.- 4:30p.m)
+	Allow the pet owner to fill out the information about the pet
+	When the owner hits done or submit/ Show a confirmation message saying that the "Day and time has now been scheduled for pet care"
+
+
 **b. Design changes**
 
+class Owner: Represents a pet owner.
+class Pet: Represents a pet receiving care.
+class Task: Represents pet care tasks selected by the owner.
+class Scheduler: Schedules pet care appointments.
+
 - Did your design change during implementation?
+yes I did 
 - If yes, describe at least one change and why you made it.
+ The main missing relationships are: Pet should probably hold tasks, and Scheduler should probably hold the appointment’s owner, pet, and selected tasks. The biggest logic bottleneck is keeping amount_of_pets in sync manually.
+
+
 
 ---
 

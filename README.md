@@ -72,14 +72,15 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+PawPal+ includes several lightweight scheduling algorithms in `pawpal_system.py`
+to make the app more useful for a pet owner.
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Feature | Method(s) | What it does |
+|---------|-----------|--------------|
+| Sorting behavior | `Scheduler.sort_by_time()`, `Scheduler.build_schedule_entries()` | Sorts `Task` objects by their `time` value. `build_schedule_entries()` also sorts schedule entries by date/time, priority, pet name, and task description for a stable daily plan. |
+| Filtering behavior | `Scheduler.filter_tasks()`, `Scheduler.get_pending_tasks()`, `Scheduler.get_completed_tasks()` | Filters tasks by completion status, pet name, or both. For example, it can return only pending tasks for one pet. |
+| Conflict detection logic | `Scheduler.find_conflict()`, `Scheduler.find_same_time_conflicts()`, `Scheduler.get_conflict_warning()`, `Scheduler.add_task_to_pet()` | Detects overlapping tasks for the same pet and exact same-time conflicts across one or more pets. The warning method returns a friendly message instead of crashing the app. |
+| Recurring task logic | `Scheduler.create_recurring_tasks()`, `Scheduler.add_recurring_tasks_to_pet()`, `Scheduler.complete_task()`, `Scheduler.create_next_occurrence()` | Creates repeated task copies for daily, weekly, every-two-weeks, and monthly schedules. When a daily or weekly task is completed, the scheduler can automatically create the next pending occurrence. |
 
 ## 📸 Demo Walkthrough
 
